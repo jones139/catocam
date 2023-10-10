@@ -16,10 +16,9 @@ Catozap waits for a signal from catocam, then tries to deter the cat from remain
 
 CatoCam Structure
 =================
-  # Connect to the camera rtsp stream using opencv
-  # Grab a frame
-  # Detect cats in the frame using a [RoboFlow](https://roboflow.com) model.
-  # If a cat is detected, send a signla to catozap.
+  - Connect to the camera rtsp stream using opencv
+  - Grab a frame
+  - Detect cats in the frame using a [RoboFlow](https://roboflow.com) model.
+  - If a cat is detected, send a signla to catozap.
 
 
-  
