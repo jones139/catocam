@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import importlib
+import os
 import time
 import cv2
 
@@ -20,6 +21,11 @@ class CatoCam():
 
         self.mModels = []
         self.configObj = configObj
+
+        self.outDir = configObj['outDir']
+        if not os.path.exists(self.outDir):
+            os.makedirs(self.outDir)
+
         self.loadModels()
 
     def loadModels(self):
@@ -39,12 +45,21 @@ class CatoCam():
             print("Model %s" % m[0])
 
 
+    def recordCat(self, retObj, img):
+        pass
+
     def analyseImage(self, img):
         for modelName, modelClass in self.mModels:
             foundCat, retObj = modelClass.findCat(img)
-            print(modelName, foundCat, retObj)
-            if foundCat:
-                modelClass.getAnnotatedImage(img)
+            #print(modelName, foundCat, retObj)
+            foundSomething = False
+            for pred in retObj['predictions']:
+                if pred['confidence']>0.5:
+                    foundSomething = True
+
+            if foundSomething:
+                annotatedImg = modelClass.getAnnotatedImage(img)
+                self.recordCat(retObj, annotatedImg)
 
     def testFile(self, testFname, fps = 1):
         print("CatoCam.testFile() - testFname=%s" % testFname)
@@ -58,7 +73,8 @@ class CatoCam():
             success, img = cap.read()
             nFrames += 1
             if nFrames >=FRAME_BATCH_SIZE:
-                self.analyseImage(img)
+                if (success):
+                    self.analyseImage(img)
                 tdiff = time.time() - batchStartTime
                 fps = nFrames / tdiff
                 print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, fps))
@@ -69,7 +85,8 @@ class CatoCam():
     def getFrames(self, testFname=None):
         if testFname is not None:
             self.testFile(testFname)
-
+            return
+        
         camArr = []
         for cam in self.configObj["cameras"]:
             print("getFrames() adding camera")
@@ -81,12 +98,11 @@ class CatoCam():
         nFrames = 0
         batchStartTime = time.time()
         iterDurationReq = 1.0/FRAME_RATE_REQ
-        #cf = catFinder.CatFinder()
         while(camArr[0].isOpened()):
             iterStartTime = time.time()
-            ret, frame = camArr[0].read()
-            #cv2.imshow('frame', frame)
-            #cf.findCat(frame)
+            success, img = camArr[0].read()
+            self.analyseImage(img)
+
             nFrames += 1
             if (nFrames >= FRAME_BATCH_SIZE):
                 tdiff = time.time() - batchStartTime

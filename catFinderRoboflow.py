@@ -4,6 +4,8 @@ import catFinder
 from roboflow import Roboflow
 from inference_sdk import InferenceHTTPClient
 
+import imgUtils
+
 
 class CatFinderRoboflow(catFinder.CatFinder):
     def __init__(self, settingsObj, debug):
@@ -70,21 +72,14 @@ class CatFinderRoboflow(catFinder.CatFinder):
                         #print("bbox=(%d, %d, %d, %d)" % (x0,y0,x1,y1))
                         
                         cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,0), 10)
-                        cv2.putText(img, "Cat", (x0, y0 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
+                        cv2.putText(img, pred['class'], (x0, y0 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-                    h, w, c = img.shape
-                    #print("initial w,h=%d,%d" % (w,h))
-                    wNew = 640
-                    scale = w*1.0/640
-                    hNew = int(h*640/w)
-                    #print("new w,h=%d,%d" % (wNew, hNew))
-                    
-                    imgScaled = cv2.resize(img, (wNew, hNew))
-
+                    imgScaled = imgUtils.scaleW(img,640)
                     # Show image
                     cv2.imshow('Image Frame', imgScaled)
                     cv2.waitKey(1) # waits 1ms
                     #cv2.destroyAllWindows() # destroys the window showing imag
+                    return(imgScaled)
 
 # infer on an image hosted elsewhere
 # print(model.predict("URL_OF_YOUR_IMAGE", hosted=True, confidence=40, overlap=30).json())
