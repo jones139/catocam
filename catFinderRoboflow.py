@@ -18,7 +18,7 @@ class CatFinderRoboflow(catFinder.CatFinder):
         if not self.localServer:
             rf = Roboflow(api_key=self.apiKey)
             project = rf.workspace().project(self.projectId)
-            self.model = project.version().model
+            self.model = project.version(self.versionId).model
 
     def getInferenceResults(self, img):
         if self.localServer:
@@ -29,7 +29,7 @@ class CatFinderRoboflow(catFinder.CatFinder):
             retObj = CLIENT.infer(img, model_id="%s/%s" % (self.projectId,self.versionId))
         else:
             # infer using hosted model
-            retObj = self.model.predict(img, hosted=True, confidence=50, overlap=30).json()
+            retObj = self.model.predict(img, confidence=50, overlap=30).json()
         #print("CatFinderRoboflow.findCat() - retObj=", retObj)
         return retObj
 
@@ -76,8 +76,8 @@ class CatFinderRoboflow(catFinder.CatFinder):
 
                     imgScaled = imgUtils.scaleW(img,640)
                     # Show image
-                    cv2.imshow('Image Frame', imgScaled)
-                    cv2.waitKey(1) # waits 1ms
+                    #cv2.imshow('Image Frame', imgScaled)
+                    #cv2.waitKey(1) # waits 1ms
                     #cv2.destroyAllWindows() # destroys the window showing imag
                     return(imgScaled)
 

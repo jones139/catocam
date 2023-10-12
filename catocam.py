@@ -77,6 +77,7 @@ class CatoCam():
                 annotatedImg = modelClass.getAnnotatedImage(img)
                 self.recordCat(retObj, annotatedImg)
 
+
     def testFile(self, testFname, fps = 1):
         print("CatoCam.testFile() - testFname=%s" % testFname)
         cap = cv2.VideoCapture(testFname)
@@ -114,10 +115,15 @@ class CatoCam():
         nFrames = 0
         batchStartTime = time.time()
         iterDurationReq = 1.0/FRAME_RATE_REQ
+        print("Looking for Cats......")
         while(camArr[0].isOpened()):
             iterStartTime = time.time()
             success, img = camArr[0].read()
-            self.analyseImage(img)
+            if (success):
+                self.analyseImage(img)
+                pass
+            else:
+                print("WARNING: Failed to retrieve image from camera")
 
             nFrames += 1
             if (nFrames >= FRAME_BATCH_SIZE):
@@ -126,17 +132,20 @@ class CatoCam():
                 print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, fps))
                 batchStartTime = time.time()
                 nFrames = 0
-            if cv2.waitKey(20) & 0xFF == ord('q'):
-                break
+            #if cv2.waitKey(20) & 0xFF == ord('q'):
+            #    break
 
             # Reduce frame rate to desired  rate.
             tnow = time.time()
             iterDuration = iterStartTime - tnow
             if (iterDuration < iterDurationReq):
-                time.sleep(iterDurationReq - iterDuration)
+                #time.sleep(iterDurationReq - iterDuration)
+                pass
+            else:
+                print("Not Sleeping - too slow!")
 
         camArr[0].release()
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
         print("Finished")
 
 
