@@ -50,34 +50,41 @@ class CatoCam():
         print("CatoCam.testFile() - testFname=%s" % testFname)
         cap = cv2.VideoCapture(testFname)
         fileFps = cap.get(cv2.CAP_PROP_FPS)
-        frameSkip = fileFps / fps
+        FRAME_BATCH_SIZE = fileFps / fps
         success = True
-        nFrame = 0
+        nFrames = 0
+        batchStartTime = time.time()
         while success:
             success, img = cap.read()
-            nFrame += 1
-            if nFrame >=frameSkip:
+            nFrames += 1
+            if nFrames >=FRAME_BATCH_SIZE:
                 self.analyseImage(img)
-                nFrame = 0
+                tdiff = time.time() - batchStartTime
+                fps = nFrames / tdiff
+                print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, fps))
+                batchStartTime = time.time()
+                nFrames = 0
+
 
     def getFrames(self, testFname=None):
         if testFname is not None:
             self.testFile(testFname)
 
         camArr = []
-        for cam in credObj["cameras"]:
+        for cam in self.configObj["cameras"]:
+            print("getFrames() adding camera")
             # Tp-Link Tapo camera RTSP stream - stream1 is high quality, stream2 low quality.
             camArr.append(cv2.VideoCapture(cam["serverUrl"]))
 
-        FRAME_RATE_REQ = 1 # fps
-        FRAME_BATCH_SIZE = 10
+        FRAME_RATE_REQ = self.configObj['maxFps']
+        FRAME_BATCH_SIZE = int(10 * FRAME_RATE_REQ)
         nFrames = 0
         batchStartTime = time.time()
         iterDurationReq = 1.0/FRAME_RATE_REQ
         #cf = catFinder.CatFinder()
-        while(cap.isOpened()):
+        while(camArr[0].isOpened()):
             iterStartTime = time.time()
-            ret, frame = cap.read()
+            ret, frame = camArr[0].read()
             #cv2.imshow('frame', frame)
             #cf.findCat(frame)
             nFrames += 1
@@ -96,8 +103,9 @@ class CatoCam():
             if (iterDuration < iterDurationReq):
                 time.sleep(iterDurationReq - iterDuration)
 
-        cap.release()
+        camArr[0].release()
         cv2.destroyAllWindows()
+        print("Finished")
 
 
 if __name__ == "__main__":
@@ -105,7 +113,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Detect Cats in Video Streams')
     parser.add_argument('--config', default="config.json",
                         help='name of json configuration file')
-    parser.add_argument('--test', default="testFile.mp4",
+    parser.add_argument('--test', default=None,
                         help='run the system on a test video file rather than live data')
     #parser.add_argument('--index', action="store_true",
     #                    help='Re-build index, not all summaries')
@@ -127,3 +135,4 @@ if __name__ == "__main__":
         cc.getFrames(testFname=testFname)
     else:
         print("Monitoring Live Camera Streams")
+        cc.getFrames(testFname=None)
