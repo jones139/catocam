@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import importlib
+import sys
 import os
 import time
 import datetime
 import cv2
 
 import argparse
-#import catFinder
 import json
-
+import framegrab
 
 class CatoCam():
     def __init__(self, configObj, debug=None):
@@ -108,18 +108,22 @@ class CatoCam():
         for cam in self.configObj["cameras"]:
             print("getFrames() adding camera")
             # Tp-Link Tapo camera RTSP stream - stream1 is high quality, stream2 low quality.
-            camArr.append(cv2.VideoCapture(cam["serverUrl"]))
+            print("Adding Camera: ", cam)
+            grabber = framegrab.FrameGrabber.create_grabber(cam)
+            camArr.append(grabber)
 
         FRAME_RATE_REQ = self.configObj['maxFps']
         FRAME_BATCH_SIZE = int(10 * FRAME_RATE_REQ)
         nFrames = 0
         batchStartTime = time.time()
         iterDurationReq = 1.0/FRAME_RATE_REQ
+
         print("Looking for Cats......")
-        while(camArr[0].isOpened()):
+        while(1):
             iterStartTime = time.time()
-            success, img = camArr[0].read()
-            if (success):
+            img = grabber.grab()
+            cv2.imshow("frame", img)
+            if (img is not None):
                 self.analyseImage(img)
                 pass
             else:
@@ -129,11 +133,12 @@ class CatoCam():
             if (nFrames >= FRAME_BATCH_SIZE):
                 tdiff = time.time() - batchStartTime
                 fps = nFrames / tdiff
-                print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, fps))
+                sys.stdout.write("%d frames in %.1f sec - %.1f fps\r" % (nFrames, tdiff, fps))
+                sys.stdout.flush()
                 batchStartTime = time.time()
                 nFrames = 0
-            #if cv2.waitKey(20) & 0xFF == ord('q'):
-            #    break
+            if cv2.waitKey(20) & 0xFF == ord('q'):
+                break
 
             # Reduce frame rate to desired  rate.
             tnow = time.time()
@@ -144,7 +149,9 @@ class CatoCam():
             else:
                 print("Not Sleeping - too slow!")
 
-        camArr[0].release()
+        for cam in camArr:
+            cam.release()
+        #camArr[0].release()
         #cv2.destroyAllWindows()
         print("Finished")
 
