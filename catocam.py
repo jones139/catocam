@@ -122,8 +122,8 @@ class CatoCam():
         while(1):
             iterStartTime = time.time()
             img = grabber.grab()
-            cv2.imshow("frame", img)
             if (img is not None):
+                cv2.imshow("frame", img)
                 self.analyseImage(img)
                 pass
             else:
