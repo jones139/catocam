@@ -9,24 +9,50 @@ import imgUtils
 
 class CatFinderRoboflow(catFinder.CatFinder):
     def __init__(self, settingsObj, debug):
+        ''' Initialise the Roboflow based cat finding object detector.
+        It expects the following elements in settingsObj:
+           - apiKey - Roboflow API key
+           - projectId - Roboflow project ID of model to be used
+           - versionId - Version ID of Roboflow model to be used
+           - localServer - if true uses a roboflow inference server on localhost:9001, rather than the one hosted by Roboflow.
+           - thresholds - the threshold 0 to 1 to be used to determine if one of the model class is detected (e.g. 0.5 = 50% confidence)
+        '''
         super().__init__(settingsObj, debug)
         self.apiKey = settingsObj['apiKey']
         self.projectId = settingsObj['projectId']
         self.versionId = settingsObj['versionId']
         self.localServer = settingsObj['localServer']
+        self.thresholds = settingsObj['thresholds']
 
         if not self.localServer:
-            rf = Roboflow(api_key=self.apiKey)
-            project = rf.workspace().project(self.projectId)
-            self.model = project.version(self.versionId).model
+            try:
+                rf = Roboflow(api_key=self.apiKey)
+                project = rf.workspace().project(self.projectId)
+                self.model = project.version(self.versionId).model
+            except Exception as e:
+                print("***************************************************************************************")
+                print("******                   Error connecting to Roboflow Model                      ******")
+                print("****** Have you started the local inference server with 'inference server start'? *****")
+                print("***************************************************************************************")
+                raise
+
+
 
     def getInferenceResults(self, img):
         if self.localServer:
-            CLIENT = InferenceHTTPClient(
-            api_url="http://localhost:9001",
-            api_key=self.apiKey
-            )
-            retObj = CLIENT.infer(img, model_id="%s/%s" % (self.projectId,self.versionId))
+            try:
+                CLIENT = InferenceHTTPClient(
+                api_url="http://localhost:9001",
+                api_key=self.apiKey
+                )
+                retObj = CLIENT.infer(img, model_id="%s/%s" % (self.projectId,self.versionId))
+            except Exception as e:
+                print("***************************************************************************************")
+                print("******                   Error connecting to Roboflow Model                      ******")
+                print("****** Have you started the local inference server with 'inference server start'? *****")
+                print("***************************************************************************************")
+                raise
+
         else:
             # infer using hosted model
             retObj = self.model.predict(img, confidence=50, overlap=30).json()
