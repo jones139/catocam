@@ -71,8 +71,8 @@ class CatFinderRoboflow(catFinder.CatFinder):
 
                         #print("bbox=(%d, %d, %d, %d)" % (x0,y0,x1,y1))
                         
-                        cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,0), 10)
-                        cv2.putText(img, pred['class'], (x0, y0 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
+                        cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,0), 3)
+                        cv2.putText(img, pred['class'], (x0, y0 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
 
                     imgScaled = imgUtils.scaleW(img,640)
                     # Show image
