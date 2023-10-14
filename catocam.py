@@ -52,15 +52,15 @@ class CatoCam():
         outSubDir = os.path.join(self.outDir, outFolder)
         if not os.path.exists(outSubDir):
             os.makedirs(outSubDir, exist_ok=True)
-        imgFname = "catocam-%s.png" % todaysDate.strftime("%H%M%s")
+        imgFname = "catocam-%s-%s.png" % (retObj['predictions'][0]['class'], todaysDate.strftime("%H_%M_%s"))
         logFname = "catocam.log"
         cv2.imwrite(os.path.join(outSubDir,imgFname), img)
 
         fp = open(os.path.join(outSubDir, logFname),"a")
         timeStr = todaysDate.strftime("%Y/%m/%d %H:%M:%S")
-        for pred in retObj['predictions']:
-            if pred['confidence'] > 0.5:
-                fp.write("%s - %s (%.f%%)\n" % (timeStr, pred['class'], pred['confidence']*100.))
+        pred =retObj['predictions'][0]
+        if pred['confidence'] > self.mModels[0][1].thresholds[pred['class']]:
+            fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
         
 

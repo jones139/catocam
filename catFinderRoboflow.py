@@ -48,7 +48,7 @@ class CatFinderRoboflow(catFinder.CatFinder):
                 retObj = CLIENT.infer(img, model_id="%s/%s" % (self.projectId,self.versionId))
             except Exception as e:
                 print("***************************************************************************************")
-                print("******                   Error connecting to Roboflow Model                      ******")
+                print("******                Error connecting to local Roboflow Model                   ******")
                 print("****** Have you started the local inference server with 'inference server start'? *****")
                 print("***************************************************************************************")
                 raise
@@ -65,7 +65,7 @@ class CatFinderRoboflow(catFinder.CatFinder):
         retObj = self.getInferenceResults(img)
         foundCat = False
         for pred in retObj['predictions']:
-            if pred['class']=="Cat" and pred['confidence']>0.5:
+            if pred['class']=="Cat" and pred['confidence']>self.thresholds['Cat']:
                 foundCat = True
         return(foundCat, retObj)
 
@@ -79,7 +79,8 @@ class CatFinderRoboflow(catFinder.CatFinder):
             if len(results['predictions'])>0:
                 for pred in results['predictions']:
                     #print(pred)
-                    if pred['confidence']>0.5:
+                    if pred['confidence']>self.thresholds[pred['class']]:
+                        print("found %s" % pred['class'])
                     
                         #bounding_box = results[0][0]
                         #print(bounding_box)
