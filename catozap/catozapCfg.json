@@ -1,0 +1,13 @@
+{
+    "debug": true,
+    "logName": "catozap",
+    "logFolder": "/home/graham/catocam/catozap/www/data",
+    "dataFolder": "/home/graham/catocam/catozap/www/data",
+    "waterControlPin": 22,
+    "waterMonitorPin": 23,
+    "waterCycleSecs": 600,
+    "timeOnLimit": 120,
+    "waterOnSecs": 30,
+    "opMode": "time",
+    "opModes":["off","remote","time"]
+}
