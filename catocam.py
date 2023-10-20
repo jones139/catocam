@@ -59,7 +59,7 @@ class CatoCam():
         fp = open(os.path.join(outSubDir, logFname),"a")
         timeStr = todaysDate.strftime("%Y/%m/%d %H:%M:%S")
         pred =retObj['predictions'][0]
-        print("recordCat() - class = ",pred['class'])
+        print("recordCat() - class = %s (%.2f%%)" % (pred['class'], pred['confidence']))
         if pred['confidence'] > self.mModels[0][1].thresholds[pred['class']]:
             fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
