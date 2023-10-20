@@ -40,6 +40,7 @@ class CatFinderYolo(catFinder.CatFinder):
 
 
     def getInferenceResults(self, img):
+        print("catFinderYolo.getInferenceResults() - img.shape=", img.shape)
         resultsObj = self.model.predict(img, verbose=False)
         #print("resultsObj=",resultsObj)
         retObj = {}

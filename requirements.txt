@@ -3,3 +3,5 @@ framegrab
 roboflow
 ultralytics
 inference-sdk
+tensorflow==2.13.1
+

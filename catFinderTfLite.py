@@ -4,6 +4,7 @@ import catFinder
 from PIL import Image
 import numpy as np
 import tensorflow as tf
+import imgUtils
 
 
 class CatFinderTfLite(catFinder.CatFinder):
@@ -45,7 +46,8 @@ class CatFinderTfLite(catFinder.CatFinder):
         print("catFinderTfLite.getInferenceResults - img.shape=", img.shape)
 
         #scale image
-        imgScaled = img.resize((self.width, self.height))
+        imgScaled = imgUtils.LetterBox()(image=img)
+        print("catFinderTfLite.getInferenceResults - imgScaled.shape=", imgScaled.shape)
         input_data = np.expand_dims(imgScaled, axis=0)
         print(" input_data.shape=",input_data.shape)
 
@@ -59,13 +61,12 @@ class CatFinderTfLite(catFinder.CatFinder):
         #stop_time = time.time()
 
         output_data = self.model.get_tensor(self.output_details[0]['index'])
-        print("output_data=",output_data)
+        print("output_data=",output_data, output_data.shape)
         results = np.squeeze(output_data)
 
         top_k = results.argsort()[-5:][::-1]
         print("top_k=",top_k)
 
-        resultsObj = self.model.predict(img, verbose=False)
         #print("resultsObj=",resultsObj)
         retObj = {}
         retObj['predictions'] = []
