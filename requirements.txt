@@ -1,4 +1,5 @@
 opencv-python
 framegrab
 roboflow
+ultralytics
 inference-sdk

@@ -59,7 +59,7 @@ class CatoCam():
         fp = open(os.path.join(outSubDir, logFname),"a")
         timeStr = todaysDate.strftime("%Y/%m/%d %H:%M:%S")
         pred =retObj['predictions'][0]
-        print("recordCat() - class = ",pred['class'])
+        print("\n%s: class = %s (%.2f%%) " % (timeStr, pred['class'], pred['confidence']))
         if pred['confidence'] > self.mModels[0][1].thresholds[pred['class']]:
             fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
@@ -114,21 +114,29 @@ class CatoCam():
             camArr.append(grabber)
 
         FRAME_RATE_REQ = self.configObj['maxFps']
-        FRAME_BATCH_SIZE = int(10 * FRAME_RATE_REQ)
+        FRAME_BATCH_SIZE = int(FRAME_RATE_REQ)
+        FAIL_RESTART_COUNT = 10
         nFrames = 0
         batchStartTime = time.time()
         iterDurationReq = 1.0/FRAME_RATE_REQ
 
         print("Looking for Cats......")
+        failCount = 0
         while(1):
             iterStartTime = time.time()
             img = grabber.grab()
             if (img is not None):
                 cv2.imshow("frame", img)
                 self.analyseImage(img)
-                pass
+                failCount = 0
             else:
-                print("WARNING: Failed to retrieve image from camera")
+                print("CatoCam.getFrames(): WARNING: Failed to retrieve image from camera")
+                failCount += 1
+                if (failCount >= FAIL_RESTART_COUNT):
+                    print("CatoCam.getFrames(): Restarting frame Grabber")
+                    grabber = framegrab.FrameGrabber.create_grabber(cam)
+                    failCount = 0
+
 
             nFrames += 1
             if (nFrames >= FRAME_BATCH_SIZE):
