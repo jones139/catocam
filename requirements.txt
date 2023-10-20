@@ -1,3 +1,4 @@
-cv2
+opencv-python
 framegrab
 roboflow
+inference-sdk

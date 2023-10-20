@@ -59,6 +59,7 @@ class CatoCam():
         fp = open(os.path.join(outSubDir, logFname),"a")
         timeStr = todaysDate.strftime("%Y/%m/%d %H:%M:%S")
         pred =retObj['predictions'][0]
+        print("recordCat() - class = ",pred['class'])
         if pred['confidence'] > self.mModels[0][1].thresholds[pred['class']]:
             fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
@@ -144,7 +145,7 @@ class CatoCam():
             tnow = time.time()
             iterDuration = iterStartTime - tnow
             if (iterDuration < iterDurationReq):
-                #time.sleep(iterDurationReq - iterDuration)
+                time.sleep(iterDurationReq - iterDuration)
                 pass
             else:
                 print("Not Sleeping - too slow!")
