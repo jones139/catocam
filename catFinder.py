@@ -1,5 +1,7 @@
 # Abstract cat finder class - different algorithms will inherit from this class 
 # to provide a consistent interface
+import cv2
+import imgUtils
 
 class CatFinder:
     ''' 
@@ -31,7 +33,7 @@ class CatFinder:
             if len(results['predictions'])>0:
                 for pred in results['predictions']:
                     #print(pred)
-                    if pred['confidence']>self.thresholds[pred['class']]:
+                    if pred['confidence']>0.5:  #self.thresholds[pred['class']]:
                         print("found %s" % pred['class'])
                     
                         #bounding_box = results[0][0]
