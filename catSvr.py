@@ -4,10 +4,13 @@
 
 import flask
 import datetime
+import time
+import cv2
 try:
     import gpiozero
 except:
    gpiozero = None
+   import psutil
 
 
 class CatSvr():
@@ -18,16 +21,20 @@ class CatSvr():
         '''
         self.cc = catoCam
         self.app = flask.Flask("CatoCam")
-
+        self.app.add_url_rule(rule="/", view_func=self.getIndex)
         self.app.add_url_rule(rule="/status", view_func=self.getStatus)
+        self.app.add_url_rule(rule="/mjpeg", view_func=self.getMjpeg)
+        self.app.add_url_rule(rule="/currimg", view_func=self.getCurImg)
+        self.app.add_url_rule(rule="/lastimg", view_func=self.getLastPositiveImg)
+        self.lastImgTime = None
 
     def run(self, nameStr):
         print("CatSvr.run(): %s" % nameStr)
         self.app.run(host='0.0.0.0', port=8082, debug=True, use_reloader=False)
         print("CatSvr.run() finished.")
 
-    #def add_endpoint(self, endpoint=None, endpoint_name=None, handler=None):
-    #    self.app.add_url_rule(endpoint, endpoint_name, EndpointAction(handler))
+    def getIndex(self):
+        return flask.render_template('index.html', time=time.time())
 
     def getStatus(self):
         now = datetime.datetime.now()
@@ -35,42 +42,48 @@ class CatSvr():
         if gpiozero is not None:
             cpuTemp = gpiozero.CPUTemperature()
         else:
-            cpuTemp = -1.0
+            print(psutil.sensors_temperatures())
+            cpuTemp = psutil.sensors_temperatures()['coretemp'][0][1]
         statusData = {
-            'title' : 'HELLO!',
+            'title' : 'CatoCam',
             'time': timeString,
-            'cpuT': cpuTemp
+            'cpuT': cpuTemp,
+            'foundCat': self.cc.foundCat,
+            'foundSomething': self.cc.foundSomething,
+            'fps': self.cc.fps,
+            'imgTime': self.cc.imgTime
         }
         return statusData
 
+    def prepareImgStream(self):
+        while True:
+            time.sleep(0.2)
+            if self.lastImgTime != self.cc.imgTime:
+                a , frame = cv2.imencode('.jpg', self.cc.currImg)
+                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame.tobytes() + b'\r\n')
 
+    def getMjpeg(self):
+        return flask.Response(self.prepareImgStream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    
 
-'''app = flask.Flask(__name__)
-@app.route("/")
-def hello():
-   now = datetime.datetime.now()
-   timeString = now.strftime("%Y-%m-%d %H:%M")
-   templateData = {
-      'title' : 'HELLO!',
-      'time': timeString
-      }
-   return flask.render_template('index.html', **templateData)
-@app.route("/status")
-def getStatus():
-    now = datetime.datetime.now()
-    timeString = now.strftime("%Y-%m-%d %H:%M")
-    if gpiozero is not None:
-        cpuTemp = gpiozero.CPUTemperature()
-    else:
-        cpuTemp = -1.0
-    statusData = {
-        'title' : 'HELLO!',
-        'time': timeString,
-        'cpuT': cpuTemp
-    }
-    return statusData
+    def getCurImg(self):
+        if self.cc.currImg is None:
+            return "", 204
+        # Based on https://stackoverflow.com/questions/42787927/displaying-opencv-image-using-python-flask
+        retval, buffer = cv2.imencode('.png', self.cc.currImg)
+        response = flask.make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        return response
 
-'''
+    def getLastPositiveImg(self):
+        if self.cc.lastPositiveImg is None:
+            return "", 204
+        # Based on https://stackoverflow.com/questions/42787927/displaying-opencv-image-using-python-flask
+        retval, buffer = cv2.imencode('.png', self.cc.lastPositiveImg)
+        response = flask.make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        return response
+
 if __name__ == "__main__":
    #app.run(host='0.0.0.0', port=8082, debug=True)
    catSvr = CatSvr(None)

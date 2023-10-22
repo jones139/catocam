@@ -15,11 +15,6 @@ import catSvr
 
 import flask
 import datetime
-# gpiozero is used to access cpu temperature on raspberry pi.
-try:
-    import gpiozero
-except:
-   gpiozero = None
 
 class CatoCam():
     def __init__(self, configObj, debug=None):
@@ -39,6 +34,14 @@ class CatoCam():
             os.makedirs(self.outDir)
 
         self.loadModels()
+
+        self.foundCat = False
+        self.foundSomething = False
+        self.currImg = None
+        self.lastPositiveImg = None
+        self.imgTime = time.time()
+        self.lastPositiveImgTime = None
+        self.fps = 0
 
     def loadModels(self):
         if not "models" in self.configObj:
@@ -77,18 +80,34 @@ class CatoCam():
         
 
     def analyseImage(self, img):
-        for modelName, modelClass in self.mModels:
-            foundCat, retObj = modelClass.findCat(img)
-            #print(modelName, foundCat, retObj)
-            foundSomething = False
-            for pred in retObj['predictions']:
-                if pred['confidence']>0.5:
-                    foundSomething = True
+        '''
+        Analyses image img using the first model in self.mModels
+        sets instance variables imgTime, foundCat, currImg, lastPositiveImg, lastPositiveImgTime and
+        foundSomething.
+        Returns true if a cat is found or else false.'''
+        modelName, modelClass = self.mModels[0]
+        self.imgTime = time.time()
+        self.foundCat, retObj = modelClass.findCat(img)
+        
+        #print(modelName, foundCat, retObj)
+        foundSomething = False
+        for pred in retObj['predictions']:
+            if pred['confidence']>0.5:
+                foundSomething = True
 
-            if foundSomething:
-                annotatedImg = modelClass.getAnnotatedImage(img)
-                self.recordCat(retObj, annotatedImg)
-
+        if foundSomething:
+            # create an annotated image showing the bounding box of the found objects.
+            annotatedImg = modelClass.getAnnotatedImage(img)
+            # Write to the log file, and save teh annotated image.
+            self.recordCat(retObj, annotatedImg)
+            self.currImg = annotatedImg
+            self.lastPositiveImg = annotatedImg
+            self.lastPositiveImgTime = self.imgTime
+            self.foundSomething = True
+        else:
+            self.currImg = img
+            self.foundSomething = False
+        return self.foundSomething
 
     def testFile(self, testFname, fps = 1):
         print("CatoCam.testFile() - testFname=%s" % testFname)
@@ -101,12 +120,12 @@ class CatoCam():
         while success:
             success, img = cap.read()
             nFrames += 1
-            if nFrames >=FRAME_BATCH_SIZE:
-                if (success):
-                    self.analyseImage(img)
-                tdiff = time.time() - batchStartTime
-                fps = nFrames / tdiff
-                print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, fps))
+            if (success):
+                self.analyseImage(img)
+            tdiff = time.time() - batchStartTime
+            if tdiff > 1.0:
+                self.fps = nFrames / tdiff
+                print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, self.fps))
                 batchStartTime = time.time()
                 nFrames = 0
 
@@ -150,10 +169,10 @@ class CatoCam():
 
 
             nFrames += 1
-            if (nFrames >= FRAME_BATCH_SIZE):
-                tdiff = time.time() - batchStartTime
-                fps = nFrames / tdiff
-                sys.stdout.write("%d frames in %.1f sec - %.1f fps\r" % (nFrames, tdiff, fps))
+            tdiff = time.time() - batchStartTime
+            if tdiff > 1.0:
+                self.fps = nFrames / tdiff
+                sys.stdout.write("%d frames in %.1f sec - %.1f fps\r" % (nFrames, tdiff, self.fps))
                 sys.stdout.flush()
                 batchStartTime = time.time()
                 nFrames = 0
@@ -176,31 +195,6 @@ class CatoCam():
         print("Finished")
 
 
-# Web server for user interface and for catozap to check status.
-webApp = flask.Flask(__name__)
-@webApp.route("/")
-def hello():
-   now = datetime.datetime.now()
-   timeString = now.strftime("%Y-%m-%d %H:%M")
-   templateData = {
-      'title' : 'HELLO!',
-      'time': timeString
-      }
-   return flask.render_template('index.html', **templateData)
-@webApp.route("/status")
-def getStatus():
-    now = datetime.datetime.now()
-    timeString = now.strftime("%Y-%m-%d %H:%M")
-    if gpiozero is not None:
-        cpuTemp = gpiozero.CPUTemperature()
-    else:
-        cpuTemp = -1.0
-    statusData = {
-        'title' : 'HELLO!',
-        'time': timeString,
-        'cpuT': cpuTemp
-    }
-    return statusData
 
 
 if __name__ == "__main__":
@@ -224,7 +218,6 @@ if __name__ == "__main__":
     print(configObj)
     cc = CatoCam(configObj, debug=args['debug'])
     print("Starting web server")
-    #threading.Thread(target = lambda: webApp.run(host='0.0.0.0', port=8082, debug=True, use_reloader=False)).start()
     cs = catSvr.CatSvr(cc)
     print("Creating Web Server Thread")
     wsThread = threading.Thread(target=cs.run, args=("catSvr",))
