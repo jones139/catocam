@@ -77,7 +77,23 @@ class CatoCam():
         if pred['confidence'] > 0.5: #self.mModels[0][1].thresholds[pred['class']]:
             fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
-        
+    
+    def getOutputFoldersLst(self):
+        ''' Return a list of the sub-folders in the self.outDir folder.'''
+        dirLst = [ item for item in os.listdir(self.outDir) if os.path.isdir(os.path.join(self.outDir, item)) ]
+        return dirLst
+    
+    def getSavedImgLst(self, dirName):
+        ''' Return a list of the image file names in folder self.outDir/dirname'''
+        imgLst = [ item for item in os.listdir(os.path.join(self.outDir, dirName)) 
+                  if item.lower().endswith(('.png', '.jpg', '.jpeg')) ]
+        return imgLst
+    
+    def getHistoryImg(self, dirName, imgFname):
+        imgPath = os.path.join(self.outDir, dirName, imgFname)
+        print("getHistoricalImg() - file path=%s" % imgPath)
+        img = cv2.imread(imgPath)
+        return img
 
     def analyseImage(self, img):
         '''
@@ -156,7 +172,7 @@ class CatoCam():
             iterStartTime = time.time()
             img = grabber.grab()
             if (img is not None):
-                cv2.imshow("frame", img)
+                #cv2.imshow("frame", img)
                 self.analyseImage(img)
                 failCount = 0
             else:

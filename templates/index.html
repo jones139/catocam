@@ -4,8 +4,13 @@
    </head>
    <body>
       <h1>CatoCam Server</h1>
+      <h2>Current Images</h2>
       <h3>The date and time on the server is: {{ time }}</h3>
       <img src="/currimg" alt="Current Image"/>
       <img src="/lastimg" alt="Last Positive Image"/>
+      <h2>Saved Images</h2>
+      {% for dir in folders %} 
+      <a href="history/{{ dir }} ">{{ dir }}</a>, 
+       {% endfor %}
    </body>
 </html>

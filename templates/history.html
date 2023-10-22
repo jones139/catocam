@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+   <head>
+      <title>CatoCam History for Date {{ dateStr }}</title>
+   </head>
+   <body>
+      <h1>CatoCam Server</h1>
+      <a href="/">Home</a>
+    {% if img is not none %}
+      <h2>Current and {{ img }} Images</h2>
+      <img src="/histimg/{{ dir }}/{{ img }}" alt="Selected Historical Image"/>
+      {% else %}
+      <h2> Select an Image below to View it</h2>
+      {% endif %}
+      <h2>Dates with Saved Images</h2>
+      {% for dir in folders %} 
+      <a href="/history/{{ dir }} ">{{ dir }}</a>, 
+       {% endfor %}
+      <h2> History for {{ dir }} </h2>
+      {% for img in imgLst %} 
+      <a href="/history/{{ dir }}/{{ img }} ">{{ img }}</a> <br/> 
+       {% endfor %}
+       <h3>The date and time on the server is: {{ time }}</h3>
+    </body>
+</html>

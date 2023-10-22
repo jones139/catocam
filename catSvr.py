@@ -21,11 +21,15 @@ class CatSvr():
         '''
         self.cc = catoCam
         self.app = flask.Flask("CatoCam")
+        self.app.add_url_rule(rule="/index.html", view_func=self.getIndex)
         self.app.add_url_rule(rule="/", view_func=self.getIndex)
+        self.app.add_url_rule(rule="/history/<dateStr>", view_func=self.getHistory)
+        self.app.add_url_rule(rule="/history/<dateStr>/<imgStr>", view_func=self.getHistory)
         self.app.add_url_rule(rule="/status", view_func=self.getStatus)
         self.app.add_url_rule(rule="/mjpeg", view_func=self.getMjpeg)
         self.app.add_url_rule(rule="/currimg", view_func=self.getCurImg)
         self.app.add_url_rule(rule="/lastimg", view_func=self.getLastPositiveImg)
+        self.app.add_url_rule(rule="/histimg/<dateStr>/<imgStr>", view_func=self.getHistoryImg)
         self.lastImgTime = None
 
     def run(self, nameStr):
@@ -34,7 +38,17 @@ class CatSvr():
         print("CatSvr.run() finished.")
 
     def getIndex(self):
-        return flask.render_template('index.html', time=time.time())
+        outputFolderLst = self.cc.getOutputFoldersLst()
+        return flask.render_template('index.html', time=time.time(), folders=outputFolderLst)
+
+    def getHistory(self, dateStr, imgStr=None):
+        print("getHistory() - dateStr=%s, imgStr=%s" % (dateStr, imgStr))
+        outputFolderLst = self.cc.getOutputFoldersLst()
+        imgLst = self.cc.getSavedImgLst(dateStr)
+        print("getHistory() - imgLst=", imgLst)
+        return flask.render_template('history.html', time=time.time(), folders=outputFolderLst, dir=dateStr, img=imgStr, imgLst=imgLst)
+
+        return flask.render_template('history.html', time=time.time(), folders=outputFolderLst, dir=dateStr, img=imgStr, imgLst=imgLst)
 
     def getStatus(self):
         now = datetime.datetime.now()
@@ -83,6 +97,18 @@ class CatSvr():
         response = flask.make_response(buffer.tobytes())
         response.headers['Content-Type'] = 'image/png'
         return response
+    
+    def getHistoryImg(self, dateStr, imgStr):
+        print("getHistoryImg() - dateStr=%s, imgStr=%s" % (dateStr, imgStr))
+        img = self.cc.getHistoryImg(dateStr, imgStr)
+        if img is None:
+            return "", 204
+        # Based on https://stackoverflow.com/questions/42787927/displaying-opencv-image-using-python-flask
+        retval, buffer = cv2.imencode('.png', img)
+        response = flask.make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        return response
+
 
 if __name__ == "__main__":
    #app.run(host='0.0.0.0', port=8082, debug=True)
