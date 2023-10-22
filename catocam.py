@@ -5,10 +5,21 @@ import os
 import time
 import datetime
 import cv2
+import threading
 
 import argparse
 import json
 import framegrab
+
+import catSvr
+
+import flask
+import datetime
+# gpiozero is used to access cpu temperature on raspberry pi.
+try:
+    import gpiozero
+except:
+   gpiozero = None
 
 class CatoCam():
     def __init__(self, configObj, debug=None):
@@ -165,6 +176,33 @@ class CatoCam():
         print("Finished")
 
 
+# Web server for user interface and for catozap to check status.
+webApp = flask.Flask(__name__)
+@webApp.route("/")
+def hello():
+   now = datetime.datetime.now()
+   timeString = now.strftime("%Y-%m-%d %H:%M")
+   templateData = {
+      'title' : 'HELLO!',
+      'time': timeString
+      }
+   return flask.render_template('index.html', **templateData)
+@webApp.route("/status")
+def getStatus():
+    now = datetime.datetime.now()
+    timeString = now.strftime("%Y-%m-%d %H:%M")
+    if gpiozero is not None:
+        cpuTemp = gpiozero.CPUTemperature()
+    else:
+        cpuTemp = -1.0
+    statusData = {
+        'title' : 'HELLO!',
+        'time': timeString,
+        'cpuT': cpuTemp
+    }
+    return statusData
+
+
 if __name__ == "__main__":
     print("catocam.main()")
     parser = argparse.ArgumentParser(description='Detect Cats in Video Streams')
@@ -184,8 +222,15 @@ if __name__ == "__main__":
     infile = open(args['config'])
     configObj = json.load(infile)
     print(configObj)
-
     cc = CatoCam(configObj, debug=args['debug'])
+    print("Starting web server")
+    #threading.Thread(target = lambda: webApp.run(host='0.0.0.0', port=8082, debug=True, use_reloader=False)).start()
+    cs = catSvr.CatSvr(cc)
+    print("Creating Web Server Thread")
+    wsThread = threading.Thread(target=cs.run, args=("catSvr",))
+    print("Starting Web Server Thread")
+    wsThread.start()
+    print("starting CatoCam analyser")
     if args['test'] is not None:
         testFname = args['test']
         print("Testing using file %s" % testFname)
