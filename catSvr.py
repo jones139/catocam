@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Based on https://stackoverflow.com/questions/40460846/using-flask-inside-class
-
+import os
 import flask
 import datetime
 import time
@@ -20,7 +20,8 @@ class CatSvr():
         doing the cat detection
         '''
         self.cc = catoCam
-        self.app = flask.Flask("CatoCam")
+        self.app = flask.Flask("CatoCam", template_folder="www/templates", 
+                               static_folder="www/static", static_url_path='/')
         self.app.add_url_rule(rule="/index.html", view_func=self.getIndex)
         self.app.add_url_rule(rule="/", view_func=self.getIndex)
         self.app.add_url_rule(rule="/history/<dateStr>", view_func=self.getHistory)
@@ -30,6 +31,7 @@ class CatSvr():
         self.app.add_url_rule(rule="/currimg", view_func=self.getCurImg)
         self.app.add_url_rule(rule="/lastimg", view_func=self.getLastPositiveImg)
         self.app.add_url_rule(rule="/histimg/<dateStr>/<imgStr>", view_func=self.getHistoryImg)
+        #self.app.add_url_rule(rule="/favicon.ico", view_func=self.getFavicon)
         self.lastImgTime = None
 
     def run(self, nameStr):
@@ -109,6 +111,9 @@ class CatSvr():
         response.headers['Content-Type'] = 'image/png'
         return response
 
+    def getFavicon(self):
+        return flask.send_from_directory(os.path.join(self.app.root_path, 'www'),
+                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == "__main__":
    #app.run(host='0.0.0.0', port=8082, debug=True)
