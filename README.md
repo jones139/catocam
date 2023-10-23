@@ -1,4 +1,5 @@
-CatoCam
+
+<img src="https://github.com/jones139/catocam/blob/main/www/static/catocam_logo.png?raw=true" width=100/>CatoCam
 =======
 Detect and Deter cats using cctv images.
 
@@ -18,7 +19,15 @@ CatoCam Structure
 =================
   - Connect to the camera rtsp stream using opencv
   - Grab a frame
-  - Detect cats in the frame using a [RoboFlow](https://roboflow.com) model.
-  - If a cat is detected, send a signla to catozap.
+  - Detect cats in the frame using a custom trained [YoloV8](https://yolov8.com) model.
+  - Save annotated frames that contain detected cats, birds or humans to disk for future analysis
+  - If a cat is detected, send a signla to catozap to unleash the deterrent.
+
+  Catocam is running on a Raspberry Pi 4B, 2GB memory and achieving 0.6 frames per second.  I am hoping to improve this by using a quantized version of the yolov8n model.
+
+  An example output is shown below:
+  <img src="https://github.com/jones139/catocam/blob/main/Docs/example_image.png?raw=true" width=640/>
+
+
 
 
