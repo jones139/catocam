@@ -50,13 +50,11 @@ class CatSvr():
         print("getHistory() - imgLst=", imgLst)
         return flask.render_template('history.html', time=time.time(), folders=outputFolderLst, dir=dateStr, img=imgStr, imgLst=imgLst)
 
-        return flask.render_template('history.html', time=time.time(), folders=outputFolderLst, dir=dateStr, img=imgStr, imgLst=imgLst)
-
     def getStatus(self):
         now = datetime.datetime.now()
         timeString = now.strftime("%Y-%m-%d %H:%M")
         if gpiozero is not None:
-            cpuTemp = gpiozero.CPUTemperature()
+            cpuTemp = gpiozero.CPUTemperature().temperature
         else:
             print(psutil.sensors_temperatures())
             cpuTemp = psutil.sensors_temperatures()['coretemp'][0][1]
