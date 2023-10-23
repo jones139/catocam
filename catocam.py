@@ -80,14 +80,29 @@ class CatoCam():
     
     def getOutputFoldersLst(self):
         ''' Return a list of the sub-folders in the self.outDir folder.'''
+
         dirLst = [ item for item in os.listdir(self.outDir) if os.path.isdir(os.path.join(self.outDir, item)) ]
-        return dirLst
+        dirLstSorted = sorted(dirLst, key=lambda item: os.path.getctime(os.path.join(self.outDir, item)))
+
+        # from https://www.tutorialspoint.com/How-do-you-get-a-directory-listing-sorted-by-creation-date-in-Python#:~:text=The%20%22os.,listing%20based%20on%20creation%20date.
+        #def sorted_directory_listing_by_creation_time_with_os_listdir(directory):
+        #    def get_creation_time(item):
+        #        item_path = os.path.join(directory, item)
+        #        return os.path.getctime(item_path)
+
+        #    items = os.listdir(directory)
+        #    sorted_items = sorted(items, key=get_creation_time)
+        #    return sorted_items
+
+        return dirLstSorted
     
     def getSavedImgLst(self, dirName):
         ''' Return a list of the image file names in folder self.outDir/dirname'''
         imgLst = [ item for item in os.listdir(os.path.join(self.outDir, dirName)) 
                   if item.lower().endswith(('.png', '.jpg', '.jpeg')) ]
-        return imgLst
+        imgLstSorted = sorted(imgLst, key=lambda item: os.path.getctime(os.path.join(self.outDir, dirName, item)))
+
+        return imgLstSorted
     
     def getHistoryImg(self, dirName, imgFname):
         imgPath = os.path.join(self.outDir, dirName, imgFname)
