@@ -66,7 +66,7 @@ class CatoCam():
         outSubDir = os.path.join(self.outDir, outFolder)
         if not os.path.exists(outSubDir):
             os.makedirs(outSubDir, exist_ok=True)
-        imgFname = "catocam-%s-%s.png" % (retObj['predictions'][0]['class'], todaysDate.strftime("%H_%M_%s"))
+        imgFname = "catocam-%s-%s.png" % (retObj['predictions'][0]['class'], todaysDate.strftime("%H_%M_%S"))
         logFname = "catocam.log"
         cv2.imwrite(os.path.join(outSubDir,imgFname), img)
 

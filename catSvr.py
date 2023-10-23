@@ -41,14 +41,21 @@ class CatSvr():
 
     def getIndex(self):
         outputFolderLst = self.cc.getOutputFoldersLst()
-        return flask.render_template('index.html', time=time.time(), folders=outputFolderLst)
+        return flask.render_template('index.html', 
+                                     time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                                     folders=outputFolderLst)
 
     def getHistory(self, dateStr, imgStr=None):
         print("getHistory() - dateStr=%s, imgStr=%s" % (dateStr, imgStr))
         outputFolderLst = self.cc.getOutputFoldersLst()
         imgLst = self.cc.getSavedImgLst(dateStr)
         print("getHistory() - imgLst=", imgLst)
-        return flask.render_template('history.html', time=time.time(), folders=outputFolderLst, dir=dateStr, img=imgStr, imgLst=imgLst)
+        return flask.render_template('history.html', 
+                                     time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                                     folders=outputFolderLst, 
+                                     dir=dateStr, 
+                                     img=imgStr, 
+                                     imgLst=imgLst)
 
     def getStatus(self):
         now = datetime.datetime.now()
