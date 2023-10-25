@@ -7,7 +7,11 @@
       <a href="/">Home</a>
     {% if img is not none %}
       <h2>{{ img }} Image</h2>
-      <img src="/histimg/{{ dir }}/{{ img }}" alt="Selected Historical Image"/>
+      <a href="/history/{{ dir }}/{{ idxPrev }}">Prev</a>
+      .....
+      <a href="/history/{{ dir }}/{{ idxNext }}">Next</a><br/>
+
+      <img src="/histimg/{{ dir }}/{{ idx }}" alt="Selected Historical Image"/>
       {% else %}
       <h2> Select an Image below to View it</h2>
       {% endif %}
@@ -16,8 +20,8 @@
       <a href="/history/{{ dir }} ">{{ dir }}</a>, 
        {% endfor %}
       <h2> History for {{ dir }} </h2>
-      {% for img in imgLst %} 
-      <a href="/history/{{ dir }}/{{ img }} ">{{ img }}</a> <br/> 
+      {% for i in range(0,imgLst|length) %} 
+      <a href="/history/{{ dir }}/{{ i }} ">{{ imgLst[i] }}</a> <br/> 
        {% endfor %}
        <h3>The date and time on the server is: {{ time }}, running at {{ fps }} fps and {{ cpuT }} degC</h3>
     </body>

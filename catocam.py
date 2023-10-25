@@ -104,6 +104,15 @@ class CatoCam():
 
         return imgLstSorted
     
+    def getHistoryImgByIndex(self, dirName, idx):
+        imgLst = self.getSavedImgLst(dirName)
+        imgFname = imgLst[idx]
+        imgPath = os.path.join(self.outDir, dirName, imgFname)
+        print("getHistoricalImg() - file path=%s" % imgPath)
+        img = cv2.imread(imgPath)
+        return img
+
+
     def getHistoryImg(self, dirName, imgFname):
         imgPath = os.path.join(self.outDir, dirName, imgFname)
         print("getHistoricalImg() - file path=%s" % imgPath)
