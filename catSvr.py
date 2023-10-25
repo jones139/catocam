@@ -51,20 +51,20 @@ class CatSvr():
 
 
     def getHistory(self, dateStr, idx=None):
-        idx = int(idx)
-        print("getHistory() - dateStr=%s, idx=%s" % (dateStr, idx))
+        #print("getHistory() - dateStr=%s, idx=%s" % (dateStr, idx))
         outputFolderLst = self.cc.getOutputFoldersLst()
         imgLst = self.cc.getSavedImgLst(dateStr)
         statusObj = self.getStatus()
         #print("getHistory() - imgLst=", imgLst)
-        if idx is not None:
+        if idx is not None and idx != "None":
+            idx = int(idx)
             if idx>=0 and idx<=len(imgLst):
                 imgStr = imgLst[idx]
                 if idx>0: 
                     idxPrev = idx-1
                 else:
                     idxPrev = None
-                if idx<len(imgLst-1):
+                if idx<len(imgLst)-1:
                     idxNext = idx+1
                 else:
                     idxNext = None
@@ -151,6 +151,8 @@ class CatSvr():
         return response
     
     def getHistoryImg(self, dateStr, idx):
+        if idx is None:
+            return None
         idx = int(idx)
         print("getHistoryImg() - dateStr=%s, imgStr=%s" % (dateStr, idx))
         img = self.cc.getHistoryImgByIndex(dateStr, idx)
