@@ -40,8 +40,8 @@ CatoCam Structure
 Training the YoloV8 Model
 =========================
 If found that pre-trained object detection models were giving poor performance on my cctv images, probably for two reasons:
-  1 The camera angle is looking down on the  scene, which is not the case for most image libraries.
-  2 The images are often taken under infrared illumination so are grey scale not colour
+  1. The camera angle is looking down on the  scene, which is not the case for most image libraries.
+  2. The images are often taken under infrared illumination so are grey scale not colour
 
 For this reason I modified the YoloV8 model by training it on my own models.   This required the following:
   - Set up the camera and have it monitor the garden, recording video clips when motion was detected.
@@ -56,6 +56,14 @@ For this reason I modified the YoloV8 model by training it on my own models.   T
   - Export the Roboflow dataset in YoloV8 format
   - Use the simple [trainYolo.py](./yolo/trainYolo.py) script to train the model using our new dataset.
       - This creates a new set of weights for the yolo model, which we saved as [catFinderV8_yoloWeights.pt](./catFinderV8_yoloWeights.pt) for use by CatoCam.
+
+### Results
+The results were surprisingly good - we detected cats very well.   But, it detected pigeons as cats too, and I might not want to shoot the pigeons, so I introduced an extra category 'bird'.  I also found it was detecting people as cats sometimes, so I added a set of images of people and an extra category 'human'.   Having done that we seem to be detecting cats, birds and humans quite well.
+
+Now the camera I am using will track motion to keep the moving object in the field of view.   This does mean that the background can change quite a bit and I found that if it saw the edge of a wall, or a barrel shaped compost bin it was marking this as a human.   This is not too big a deal because I won't be shooting humans, but I'd rather it got it right.  So I added more images of other things it might see in the garden and marked them as null (not a cat, bird or human).   This is now working pretty well, but I do get the occasional 'human' detection for a close up of a cobweb under the IR floodlight, so I'll need to add some cobweb images in too.
+
+I also have the idea of using this with several cameras in different positions around the garden, so I have installed on next to the drive.   Initial results suggest it still detects humans ok, but it sees other shapes like windows and the gate posts as humans - I think it has larned that tall, narrow things are human....  So I have collected a lot more negative images and are currently training those into the model so we can see if it can detect cats in a different setting to the training images - ie to see how generic the model is.   I might see if [James Milward](https://medium.com/@james.milward/deterring-foxes-and-badgers-with-tensorflow-lite-python-raspberry-pi-ring-cameras-ultrasonic-75b3160faa3c) is interested in comparing results on each others datasets...
+
 
 
 
