@@ -51,7 +51,9 @@ For this reason I modified the YoloV8 model by training it on my own models.   T
       - view each frame
       - let me draw a bounding box around the interesting objects (cats, birds or humans), and label them as such.
       - Add the images to a dataset, along with augmentation of the objects in the bounding boxes.
-      - Publish the [dataset](https://app.roboflow.com/graham-jones-yynmh/catocam/8)
+      - Publish the [dataset](https://universe.roboflow.com/graham-jones-yynmh/catocam) <a href="https://universe.roboflow.com/graham-jones-yynmh/catocam">
+    <img src="https://app.roboflow.com/images/download-dataset-badge.svg"></img>
+</a>
   - The annotation was made less tedious by first doing a few (well a hundred or so) frames manually, then using RoboFlow's training functionality (you get three goes at training a model with a free account), to create an object detection model.   This object detection model can then be used to help you annotate other images by suggesting what the bounding box and object is, so you only have to correct it when it has something wrong.
   - Export the Roboflow dataset in YoloV8 format
   - Use the simple [trainYolo.py](./yolo/trainYolo.py) script to train the model using our new dataset.
