@@ -11,9 +11,10 @@ Project Outline
 ===============
 There are two distinct parts to the project - CatoCam and CatoZap
 
-Catocam monitors the video stream from a [Tp-Link tapo](https://www.tp-link.com/uk/home-networking/cloud-camera/tapo-c510w/) cctv camera by connecting to its local network rtsp stream to grab frames.   
+Catocam monitors the video stream from a [Tp-Link tapo](https://www.tp-link.com/uk/home-networking/cloud-camera/tapo-c510w/) cctv camera by connecting to its local network rtsp stream to grab frames.  
+<img src="https://static.tp-link.com/upload/image-line/01_normal_20230420071916t.jpg" width=50 alt="tapo camera picture"> 
 
-It uses a machine learning object detection model to determine whether the frame contains an image of a cat or not.
+It uses a machine learning object detection model [YoloV8](https://yolov8.com) to determine whether the frame contains an image of a cat or not.
 
 It provides a web interface which can be monitored to see when a cat is detected.
 
