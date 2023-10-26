@@ -1,9 +1,9 @@
 import os
 from ultralytics import YOLO
 
-test_image_path="/home/graham/yolo/datasets/CatoCam.V8/test/images"
+test_image_path="/home/graham/yolo/datasets/CatoCam.V10/test/images"
 
-model = YOLO("runs/detect/train10/weights/best.pt")
+model = YOLO("runs/detect/train12/weights/best.pt")
 
 for input_filename in os.listdir(test_image_path):
     if '.jpg' in input_filename:

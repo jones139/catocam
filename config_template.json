@@ -1,8 +1,30 @@
 {
+    "outDir": "/home/graham/catocam/output",
+    "maxFps": 10.0,
     "cameras": [
         {
-            "id": "cam1",
-            "serverUrl": "rtsp://user:passwd@192.168.0.101/stream2"
+            "name": "Back Garden",
+            "input_type": "rtsp",
+            "id": {
+                "rtsp_url": "rtsp://uname:passwd@ipaddr/stream2"
+            },
+            "options": {
+            }
         }
+    ],
+    "models": [
+        { 
+            "name": "Yolo", 
+            "class": "catFinderYolo.CatFinderYolo",
+            "settings": {
+                "weights": "catFinder_yoloWeights.pt",
+                "thresholds" : {
+                    "Cat": 0.6,
+                    "Bird": 0.7,
+                    "Human": 0.7
+                }
+            }
+        }        
     ]
+
 }
