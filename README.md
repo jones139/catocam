@@ -1,6 +1,6 @@
 
 <img src="Docs/Catocam_header.png" />
-=======
+
 CatoCam & CatoZap - monitor a cctv camera to detect cats (CatoCam), and unleash a suitable cat deterrent (CatoZap).
 
 Purpose
