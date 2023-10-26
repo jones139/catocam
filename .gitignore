@@ -5,3 +5,6 @@ config.json
 __pycache__
 output
 images
+*~
+dataset
+datasets
