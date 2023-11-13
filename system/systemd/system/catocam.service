@@ -1,0 +1,11 @@
+[Unit]
+Description=Catocam Service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/graham/pyEnvs/catocam/bin/python /home/graham/catocam/catocam.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
