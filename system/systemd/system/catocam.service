@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/home/graham/pyEnvs/catocam/bin/python /home/graham/catocam/catocam.py
+ExecStart=/home/graham/pyEnvs/catocam/bin/python /home/graham/catocam/catocam.py --config=/home/graham/catocam/config.json
 Restart=on-abort
 
 [Install]

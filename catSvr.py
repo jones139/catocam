@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 # Based on https://stackoverflow.com/questions/40460846/using-flask-inside-class
@@ -20,8 +21,8 @@ class CatSvr():
         doing the cat detection
         '''
         self.cc = catoCam
-        self.app = flask.Flask("CatoCam", template_folder="www/templates", 
-                               static_folder="www/static", static_url_path='/')
+        self.app = flask.Flask("CatoCam", template_folder="/home/graham/catocam/www/templates", 
+                               static_folder="/home/graham/catocam/www/static", static_url_path='/')
         self.app.add_url_rule(rule="/index.html", view_func=self.getIndex)
         self.app.add_url_rule(rule="/", view_func=self.getIndex)
         self.app.add_url_rule(rule="/history/<dateStr>", view_func=self.getHistory)
