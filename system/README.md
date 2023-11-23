@@ -1,5 +1,5 @@
-System Scripts for Greenhouse Controller
-########################################
+System Scripts for CatoCam
+##########################
 
 
 Copy systemd/system/catocam.service to /lib/systemd/system
@@ -10,4 +10,5 @@ systemctl daemon-reload
 systemctl enable catocam.service
 systemctl start catocam.service
 
+View the log with:
 journalctl -f -u catocam.service (view log)

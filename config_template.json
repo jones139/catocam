@@ -25,6 +25,9 @@
                 }
             }
         }        
-    ]
-
+    ],
+    "catoZap": {
+        "enabled": 1,
+        "waterPins": [17, 27, 22]
+    }
 }

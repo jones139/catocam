@@ -16,6 +16,8 @@ import catSvr
 import flask
 import datetime
 
+import catozap
+
 class CatoCam():
     def __init__(self, configObj, debug=None):
         self.debug = False
@@ -33,6 +35,7 @@ class CatoCam():
         if not os.path.exists(self.outDir):
             os.makedirs(self.outDir)
 
+        # Load the cat detection model(s)
         self.loadModels()
 
         self.foundCat = False
@@ -41,7 +44,14 @@ class CatoCam():
         self.lastPositiveImg = None
         self.imgTime = time.time()
         self.lastPositiveImgTime = None
+        self.lastCatImgTime = None
+        self.catEventActive = False
+        self.catEventStartTime = None
         self.fps = 0
+        self.framesLst = []
+
+        # Start the catozap water zapper service.
+        self.cz = catozap.CatoZap(configObj['catoZap'])
 
     def loadModels(self):
         if not "models" in self.configObj:
@@ -60,12 +70,21 @@ class CatoCam():
             print("Model %s" % m[0])
 
 
-    def recordCat(self, retObj, img):
+    def getOutSubDir(self):
         todaysDate = datetime.datetime.now()
         outFolder = todaysDate.strftime("%Y-%m-%d")
         outSubDir = os.path.join(self.outDir, outFolder)
         if not os.path.exists(outSubDir):
             os.makedirs(outSubDir, exist_ok=True)
+        return(outSubDir)
+
+    def recordCat(self, retObj, img):
+        todaysDate = datetime.datetime.now()
+        #outFolder = todaysDate.strftime("%Y-%m-%d")
+        #outSubDir = os.path.join(self.outDir, outFolder)
+        #if not os.path.exists(outSubDir):
+        #    os.makedirs(outSubDir, exist_ok=True)
+        outSubDir = self.getOutSubDir()
         imgFname = "catocam-%s-%s.png" % (retObj['predictions'][0]['class'], todaysDate.strftime("%H_%M_%S"))
         logFname = "catocam.log"
         cv2.imwrite(os.path.join(outSubDir,imgFname), img)
@@ -77,6 +96,20 @@ class CatoCam():
         if pred['confidence'] > 0.5: #self.mModels[0][1].thresholds[pred['class']]:
             fp.write("\"%s\", %s, %.f%%, %s\n" % (timeStr, pred['class'], pred['confidence']*100., imgFname))
         fp.close()
+
+    def saveCatEventVideo(self):
+        todaysDate = datetime.datetime.now()
+        outSubDir = self.getOutSubDir()
+        vidFname = "catocam-%s.mp4" % (todaysDate.strftime("%Y_%m_%d_%H_%M_%S"))
+        print("saveCatEventVideo() - saving to file %s in folder %s" % (vidFname, outSubDir))
+        print("saveCatEventVideo() - saving %d frames of size (%d, %d)" % (len(self.framesLst), self.currImg.shape[1], self.currImg.shape[0]))
+        out = cv2.VideoWriter(os.path.join(outSubDir, vidFname), cv2.VideoWriter_fourcc(*'mp4v'), 1, (self.currImg.shape[1], self.currImg.shape[0]))
+        for frame in self.framesLst:
+            out.write(frame) # frame is a numpy.ndarray with shape (1280, 720, 3)
+        out.release()
+        print("saveCatEventVideo() - finished!")
+
+
     
     def getOutputFoldersLst(self):
         ''' Return a list of the sub-folders in the self.outDir folder.'''
@@ -143,10 +176,37 @@ class CatoCam():
             self.currImg = annotatedImg
             self.lastPositiveImg = annotatedImg
             self.lastPositiveImgTime = self.imgTime
+            self.framesLst.append(annotatedImg)
             self.foundSomething = True
         else:
             self.currImg = img
             self.foundSomething = False
+            self.framesLst.append(img)
+
+
+        # Check if we are in a cat event - a cat event is started by two cat detections within 15 seconds.
+        # It ends 30 seconds after the last cat detection.
+        if self.foundCat:
+            if (not self.catEventActive):
+                if (self.lastCatImgTime is None) or (self.imgTime - self.lastCatImgTime) > 15:
+                    print("we have two cat detections within 15 seconds, so we are in a cat event...")
+                    self.catEventActive = True
+                    self.catEventStartTime = self.lastCatImgTime
+
+            self.lastCatImgTime = self.imgTime
+        else:
+            if (self.catEventActive):
+                if (self.imgTime - self.lastCatImgTime) > 30:
+                    print("End of Cat Event")
+                    self.catEventActive = False
+                    self.catEventStartTime = None
+                    self.saveCatEventVideo()
+
+        if not self.catEventActive:
+            if len(self.framesLst) > 30:
+                self.framesLst = self.framesLst[-30:]
+                print("Truncating framesLst - len=%d" % len(self.framesLst))
+
         return self.foundSomething
 
     def testFile(self, testFname, fps = 1):
@@ -160,14 +220,18 @@ class CatoCam():
         while success:
             success, img = cap.read()
             nFrames += 1
-            if (success):
-                self.analyseImage(img)
             tdiff = time.time() - batchStartTime
-            if tdiff > 1.0:
-                self.fps = nFrames / tdiff
-                print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, self.fps))
-                batchStartTime = time.time()
-                nFrames = 0
+            if (success):
+                if tdiff > 1.0:
+                    self.fps = nFrames / tdiff
+                    print("%d frames in %.1f sec - %.1f fps" % (nFrames, tdiff, self.fps))
+                    self.analyseImage(img)
+                    batchStartTime = time.time()
+                    nFrames = 0
+        print("End of file?")
+        if (self.catEventActive):
+            self.saveCatEventVideo()
+        print("CatoCam.testFile finished!")
 
 
     def getFrames(self, testFname=None):
@@ -207,6 +271,10 @@ class CatoCam():
                     grabber = framegrab.FrameGrabber.create_grabber(cam)
                     failCount = 0
 
+            if (self.catEventActive):
+                print("CatoCam.getFrames() - Cat Event Active - Firing!")
+                self.cz.fire()
+                
 
             nFrames += 1
             tdiff = time.time() - batchStartTime

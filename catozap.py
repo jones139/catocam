@@ -1,36 +1,44 @@
 #!/usr/bin/env python
 
 import time
-import RPi.GPIO as GPIO
 from threading import Thread
+try:
+    import RPi.GPIO as GPIO
+except:
+    from rpiDummy import GPIO as GPIO
 
 class CatoZap:
-    def __init__(self, pinLst):
-        self.pinLst = pinLst
+    def __init__(self, configObj):
+        self.pinLst = configObj['waterPins']
+        self.enabled = configObj['enabled']
         self.startFiring = False
         self.shutdown = False
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         for pinNo in self.pinLst:
+            print("CatoZap.__init__() - setting up pin %s" % pinNo)
             GPIO.setup(pinNo, GPIO.OUT)
             GPIO.output(pinNo, GPIO.LOW)
             
         
     def _fire(self):
-        print("CatoZap._fire()")
-        try:
-            GPIO.output(self.pinLst[0], GPIO.HIGH)
-            for pinNo in self.pinLst[1:]:
-                GPIO.output(pinNo, GPIO.HIGH)
+        if (self.enabled):
+            print("CatoZap._fire()")
+            try:
+                GPIO.output(self.pinLst[0], GPIO.HIGH)
+                for pinNo in self.pinLst[1:]:
+                    GPIO.output(pinNo, GPIO.HIGH)
+                    time.sleep(0.2)
+                    GPIO.output(pinNo, GPIO.LOW)
                 time.sleep(0.2)
-                GPIO.output(pinNo, GPIO.LOW)
-            time.sleep(0.2)
-            GPIO.output(self.pinLst[0], GPIO.LOW)
-            print("CatoZap._fire() - water off")
-        except:
-            print("CatoZap._fire() - exception - calling stopFiring()")
-            self.stopFiring()
-            raise
+                GPIO.output(self.pinLst[0], GPIO.LOW)
+                print("CatoZap._fire() - water off")
+            except:
+                print("CatoZap._fire() - exception - calling stopFiring()")
+                self.stopFiring()
+                raise
+        else:
+            print("CatoZap._fire() - CatoZab not enabled in configuration object")
 
     def stopFiring(self):
         ''' Shut down the water - should be called if an exception is raised
@@ -73,7 +81,7 @@ class CatoZap:
 
 if __name__ == "__main__":
     print("catozap main()")
-    cz = CatoZap([17, 27, 22])
+    cz = CatoZap({"waterPins": [17, 27, 22], "enabled": 1})
 
     cz.start()
 
