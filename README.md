@@ -77,6 +77,19 @@ CatoZap
 The hardware side of CatoZap utilises 12V solenoid valves connected to the water main using 1/4" plastic tubing.   An interface board is used to switch the 12V required for the valves using the GPIO output from the Raspberry Pi that is running CatoCam.
 I have used the these valves <a href="https://www.amazon.co.uk/dp/B08KS5MMYK?ref=ppx_yo2ov_dt_b_product_details&th=1">12V Solenoid Valve (1/4" tube) <img src="https://m.media-amazon.com/images/I/51kyvE0x0JL._AC_SY879_.jpg" width=100/></a> with this tubing <a href="https://www.amazon.co.uk/dp/B07H2VGR71?psc=1&ref=ppx_yo2ov_dt_b_product_details">1/4" plastic tube <img src="https://m.media-amazon.com/images/I/617mJvxCSfL._AC_SX569_.jpg" width=100/></a>
 
-The interface for the Raspberry Pi is currently a three channel transistor based driver for the solenoids, using the circuit shown [here](./catozap/Electrical/catozap_schematic.pdf) <img src="./catozap/Electrical/solenoid_driver_schematic.jpg">.   It connects to the ground and GPIO7, GPIO27 and GPIO22 outputs (because they are all next to each other and next to a ground pin on the Raspberry Pi header.
-The prototype board which is assembled on stripboard is shown below:  <img src="./catozap/Electrical/solenoid_driver_prototype.jpg>
+The interface for the Raspberry Pi is currently a three channel transistor based driver for the solenoids, using the circuit shown [here](./catozap/Electrical/catozap_schematic.pdf) 
+
+<img src="./catozap/Electrical/solenoid_driver_schematic.jpg"/>.   
+
+It connects to the ground and GPIO7, GPIO27 and GPIO22 outputs (because they are all next to each other and next to a ground pin on the Raspberry Pi header.
+The prototype board which is assembled on stripboard is shown below:  
+<img src="./catozap/Electrical/solenoid_driver_prototype.jpg"/>
+
+Contact
+=======
+If anyone tries to use this and needs any help, please contact graham@openseizuredetector.org.uk, or raise an issue on this site.
+
+Licence
+=======
+All code is GPL V3 - see [LICENSE](./LICENSE).
 
