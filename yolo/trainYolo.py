@@ -1,9 +1,8 @@
 from ultralytics import YOLO
 
 # Load a model
-#model = YOLO('yolov8n.yaml')  # build a new model from YAML
-model = YOLO('yolov8n.pt')  # load a pretrained model (recommended for training)
-#model = YOLO('yolov8n.yaml').load('yolov8n.pt')  # build from YAML and transfer weights
+#model = YOLO('yolov8n.pt')  # load a pretrained model (recommended for training)
+model = YOLO('catFinderV11_yoloWeights.pt')
 
 # Train the model
-results = model.train(data='/home/graham/yolo/datasets/CatoCamV11/data.yaml', epochs=100, imgsz=640)
+results = model.train(data='/home/graham/yolo/datasets/CatoCam.V12/data.yaml', epochs=100, imgsz=640)

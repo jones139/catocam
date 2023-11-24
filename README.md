@@ -18,7 +18,9 @@ It uses a machine learning object detection model [YoloV8](https://yolov8.com) t
 
 It provides a web interface which can be monitored to see when a cat is detected.
 
-CatoZap monitors the output of CatoCam to see when a cat enters the garden.  It then tries to deter the cat from remaining in the garden.   It is likely to do this using a water spray, but I might try an ultrasonic deterrent as done in this [similar project](https://medium.com/@james.milward/deterring-foxes-and-badgers-with-tensorflow-lite-python-raspberry-pi-ring-cameras-ultrasonic-75b3160faa3c).
+When CatoCam detects that a cat has loitered in the garden for more than a few seconds, it uses CatoZap to encourage the cat to move on.  CatoZap is a simple interface to allow a raspberry Pi to control small solenoid valves to switch water jects on and off when required.  
+
+I might try extending it to use an ultrasonic deterrent as done in this [similar project](https://medium.com/@james.milward/deterring-foxes-and-badgers-with-tensorflow-lite-python-raspberry-pi-ring-cameras-ultrasonic-75b3160faa3c).
 
 CatoCam Structure
 =================
@@ -31,6 +33,9 @@ CatoCam Structure
       - Browse through previous images where cats, birds or humans were detected.
       - Provide a simple status JSON object with detection status that can be monitored by CatoZap
   - It is configured using a simple JSON config.json file that specifies the camera parameters to access the video stream, and the object detection model to be used (see the example [config.json template](./config_template.json))
+  - If it detects a cat in two frames within 15 seconds of each other, it treats this as a 'cat event', which lasts until no cat is detected for 30 seconds.
+  - During a cat event, it calls on CatoZap to fire its water jets to encourage the cat to move along.
+  - When the cat event finishes, it concatenates all of the image frames that have been collected during the event into a single movie file and saves it to disk.
 
   Catocam is running on a Raspberry Pi 4B, 2GB memory and achieving 0.6 frames per second.  I am hoping to improve this by using a quantized version of the yolov8n model.
 
@@ -67,5 +72,24 @@ Now the camera I am using will track motion to keep the moving object in the fie
 I also have the idea of using this with several cameras in different positions around the garden, so I have installed on next to the drive.   Initial results suggest it still detects humans ok, but it sees other shapes like windows and the gate posts as humans - I think it has larned that tall, narrow things are human....  So I have collected a lot more negative images and are currently training those into the model so we can see if it can detect cats in a different setting to the training images - ie to see how generic the model is.   I might see if [James Milward](https://medium.com/@james.milward/deterring-foxes-and-badgers-with-tensorflow-lite-python-raspberry-pi-ring-cameras-ultrasonic-75b3160faa3c) is interested in comparing results on each others datasets...
 
 
+CatoZap
+=======
+The hardware side of CatoZap utilises 12V solenoid valves connected to the water main using 1/4" plastic tubing.   An interface board is used to switch the 12V required for the valves using the GPIO output from the Raspberry Pi that is running CatoCam.
+I have used the these valves <a href="https://www.amazon.co.uk/dp/B08KS5MMYK?ref=ppx_yo2ov_dt_b_product_details&th=1">12V Solenoid Valve (1/4" tube) <img src="https://m.media-amazon.com/images/I/51kyvE0x0JL._AC_SY879_.jpg" width=100/></a> with this tubing <a href="https://www.amazon.co.uk/dp/B07H2VGR71?psc=1&ref=ppx_yo2ov_dt_b_product_details">1/4" plastic tube <img src="https://m.media-amazon.com/images/I/617mJvxCSfL._AC_SX569_.jpg" width=100/></a>
 
+The interface for the Raspberry Pi is currently a three channel transistor based driver for the solenoids, using the circuit shown [here](./catozap/Electrical/catozap_schematic.pdf) 
+
+<img src="./catozap/Electrical/solenoid_driver_schematic.jpg"/>.   
+
+It connects to the ground and GPIO7, GPIO27 and GPIO22 outputs (because they are all next to each other and next to a ground pin on the Raspberry Pi header.
+The prototype board which is assembled on stripboard is shown below:  
+<img src="./catozap/Electrical/solenoid_driver_prototype.jpg"/>
+
+Contact
+=======
+If anyone tries to use this and needs any help, please contact graham@openseizuredetector.org.uk, or raise an issue on this site.
+
+Licence
+=======
+All code is GPL V3 - see [LICENSE](./LICENSE).
 
