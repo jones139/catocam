@@ -5,7 +5,9 @@ from threading import Thread
 try:
     import RPi.GPIO as GPIO
 except:
+    print("*** Exception importing RPi.GPIO - falling back on rpiDummy ***")
     from rpiDummy import GPIO as GPIO
+    #raise
 
 class CatoZap:
     def __init__(self, configObj):

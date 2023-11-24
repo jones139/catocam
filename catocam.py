@@ -203,8 +203,8 @@ class CatoCam():
                     self.saveCatEventVideo()
 
         if not self.catEventActive:
-            if len(self.framesLst) > 30:
-                self.framesLst = self.framesLst[-30:]
+            if len(self.framesLst) > 10:
+                self.framesLst = self.framesLst[-10:]
                 print("Truncating framesLst - len=%d" % len(self.framesLst))
 
         return self.foundSomething

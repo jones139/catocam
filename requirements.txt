@@ -8,3 +8,4 @@ torch==2.0.1    # Needs to be this older version to avoid segfault on raspi 4 2G
 torchvision==0.15.2 # Needs to be this older version to avoid segfault on raspi 4 2Gb.
 torchaudio==2.0.2 # Needs to be this older version to avoid segfault on raspi 4 2Gb.
 flask
+rpi-gpio
