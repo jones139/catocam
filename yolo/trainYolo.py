@@ -5,4 +5,4 @@ from ultralytics import YOLO
 model = YOLO('catFinderV11_yoloWeights.pt')
 
 # Train the model
-results = model.train(data='/home/graham/yolo/datasets/CatoCam.V12/data.yaml', epochs=100, imgsz=640)
+results = model.train(data='/home/graham/yolo/datasets/CatoCam.V13/data.yaml', epochs=100, imgsz=640)

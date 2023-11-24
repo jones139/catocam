@@ -80,10 +80,6 @@ class CatoCam():
 
     def recordCat(self, retObj, img):
         todaysDate = datetime.datetime.now()
-        #outFolder = todaysDate.strftime("%Y-%m-%d")
-        #outSubDir = os.path.join(self.outDir, outFolder)
-        #if not os.path.exists(outSubDir):
-        #    os.makedirs(outSubDir, exist_ok=True)
         outSubDir = self.getOutSubDir()
         imgFname = "catocam-%s-%s.png" % (retObj['predictions'][0]['class'], todaysDate.strftime("%H_%M_%S"))
         logFname = "catocam.log"
@@ -136,7 +132,16 @@ class CatoCam():
         imgLstSorted = sorted(imgLst, key=lambda item: os.path.getctime(os.path.join(self.outDir, dirName, item)))
 
         return imgLstSorted
-    
+
+    def getSavedVideoLst(self, dirName):
+        ''' Return a list of the video file names in folder self.outDir/dirname'''
+        imgLst = [ item for item in os.listdir(os.path.join(self.outDir, dirName)) 
+                  if item.lower().endswith(('.mp4')) ]
+        imgLstSorted = sorted(imgLst, key=lambda item: os.path.getctime(os.path.join(self.outDir, dirName, item)))
+
+        return imgLstSorted
+
+
     def getHistoryImgByIndex(self, dirName, idx):
         imgLst = self.getSavedImgLst(dirName)
         imgFname = imgLst[idx]
