@@ -21,6 +21,8 @@ class CatFinder:
         for pred in retObj['predictions']:
             if pred['class']=="Cat" and pred['confidence']>self.thresholds['Cat']:
                 foundCat = True
+            #if pred['class']=="Human" and pred['confidence']>self.thresholds['Human']:
+            #    foundCat = True
         return(foundCat, retObj)
 
     def getAnnotatedImage(self, img):

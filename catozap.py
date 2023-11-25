@@ -27,13 +27,14 @@ class CatoZap:
         if (self.enabled):
             print("CatoZap._fire()")
             try:
-                GPIO.output(self.pinLst[0], GPIO.HIGH)
-                for pinNo in self.pinLst[1:]:
-                    GPIO.output(pinNo, GPIO.HIGH)
+                for n in range(0, 10):
+                    GPIO.output(self.pinLst[0], GPIO.HIGH)
+                    for pinNo in self.pinLst[1:]:
+                        GPIO.output(pinNo, GPIO.HIGH)
+                        time.sleep(0.2)
+                        GPIO.output(pinNo, GPIO.LOW)
                     time.sleep(0.2)
-                    GPIO.output(pinNo, GPIO.LOW)
-                time.sleep(0.2)
-                GPIO.output(self.pinLst[0], GPIO.LOW)
+                    GPIO.output(self.pinLst[0], GPIO.LOW)
                 print("CatoZap._fire() - water off")
             except:
                 print("CatoZap._fire() - exception - calling stopFiring()")
@@ -41,6 +42,8 @@ class CatoZap:
                 raise
         else:
             print("CatoZap._fire() - CatoZab not enabled in configuration object")
+
+            
 
     def stopFiring(self):
         ''' Shut down the water - should be called if an exception is raised
@@ -87,7 +90,9 @@ if __name__ == "__main__":
 
     cz.start()
 
-    cz.fire()
+    for n in range(0,10):
+        cz.fire()
+        time.sleep(2)
 
     print("sleeping")
     time.sleep(3)

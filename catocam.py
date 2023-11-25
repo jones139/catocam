@@ -52,6 +52,7 @@ class CatoCam():
 
         # Start the catozap water zapper service.
         self.cz = catozap.CatoZap(configObj['catoZap'])
+        self.cz.start()
 
     def loadModels(self):
         if not "models" in self.configObj:
