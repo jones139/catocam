@@ -16,6 +16,8 @@ import catSvr
 import flask
 import datetime
 
+import paho.mqtt.client as mqtt
+
 import catozap
 
 class CatoCam():
@@ -51,9 +53,40 @@ class CatoCam():
         self.framesLst = []
 
         # Start the catozap water zapper service.
-        self.cz = catozap.CatoZap(configObj['catoZap'])
-        self.cz.start()
+        if (configObj['catoZap']['enabled']):
+            print("Starting CatoZap")
+            self.cz = catozap.CatoZap(configObj['catoZap'])
+            self.cz.start()
+        else:
+            print("CatoZap disabled, not sarting")
+            self.cz = None
 
+        if (configObj['catoZapMqtt']['enabled']):
+            print("Using CatoZapMqtt")
+            self.useMqtt = True
+            self.mqttClient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1,
+                                          "catocam")
+            self.mqttClient.on_publish = self.on_mqtt_publish
+            self.mqttClient.connect(configObj['catoZapMqtt']['brokerIp'], 1883)
+            # start a new thread
+            self.mqttClient.loop_start()
+            self.doMqttZap()
+        else:
+            self.useMqtt = False
+
+    def on_mqtt_publish(self, client, userdata, mod):
+        print("sent mqtt message")
+
+    def doMqttZap(self):
+        print("doMqttZap")
+        msg = "ALL"
+        info = self.mqttClient.publish(
+            topic=self.configObj['catoZapMqtt']['zapTopic'],
+            payload=msg.encode('utf-8'),
+            qos=0,
+        )
+
+           
     def loadModels(self):
         if not "models" in self.configObj:
             print("CatoCam.loadModels() - ERROR - configObj does not contain a 'models' element.")
@@ -278,9 +311,11 @@ class CatoCam():
                     failCount = 0
 
             if (self.catEventActive):
-                print("CatoCam.getFrames() - Cat Event Active - Firing!")
-                self.cz.fire()
-                
+                if (self.cz is not None):
+                    print("CatoCam.getFrames() - Cat Event Active - Firing!")
+                    self.cz.fire()
+                if (self.useMqtt):
+                    self.doMqttZap()
 
             nFrames += 1
             tdiff = time.time() - batchStartTime
