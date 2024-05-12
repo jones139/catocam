@@ -60,7 +60,11 @@ For this reason I modified the YoloV8 model by training it on my own models.   T
     <img src="https://app.roboflow.com/images/download-dataset-badge.svg"></img>
 </a>
   - The annotation was made less tedious by first doing a few (well a hundred or so) frames manually, then using RoboFlow's training functionality (you get three goes at training a model with a free account), to create an object detection model.   This object detection model can then be used to help you annotate other images by suggesting what the bounding box and object is, so you only have to correct it when it has something wrong.
-  - Export the Roboflow dataset in YoloV8 format
+  - Export the Roboflow dataset in YoloV8 format, and extract it to ~/yolo/datasets/CatoCam.<version number>
+  - Create a python virtual environment for catocam: python -m venv /home/graham/pyEnvs/catocam
+  - Activate catocam environment with source ~/pyEnvs/catocam/bin/activate
+  - Change directory to this catocam source directory.
+  - Install dependencies with pip install -r requirements.txt
   - Use the simple [trainYolo.py](./yolo/trainYolo.py) script to train the model using our new dataset.
       - This creates a new set of weights for the yolo model, which we saved as [catFinderV8_yoloWeights.pt](./catFinderV8_yoloWeights.pt) for use by CatoCam.
 
