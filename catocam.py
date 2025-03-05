@@ -41,6 +41,7 @@ class CatoCam():
         self.loadModels()
 
         self.foundCat = False
+        self.lastFoundCat = False
         self.foundSomething = False
         self.currImg = None
         self.lastPositiveImg = None
@@ -71,6 +72,8 @@ class CatoCam():
             # start a new thread
             self.mqttClient.loop_start()
             self.doMqttZap()
+            self.reportCatMqtt(self.foundCat)
+
         else:
             self.useMqtt = False
 
@@ -82,6 +85,15 @@ class CatoCam():
         msg = "ALL"
         info = self.mqttClient.publish(
             topic=self.configObj['catoZapMqtt']['zapTopic'],
+            payload=msg.encode('utf-8'),
+            qos=0,
+        )
+
+    def reportCatMqtt(self, catStatus = False):
+        print("reportCatMqtt")
+        msg = "%d" % catStatus
+        info = self.mqttClient.publish(
+            topic=self.configObj['catoZapMqtt']['catTopic'],
             payload=msg.encode('utf-8'),
             qos=0,
         )
@@ -223,6 +235,11 @@ class CatoCam():
             self.framesLst.append(img)
 
 
+        if (self.foundCat != self.lastFoundCat):
+            if (self.useMqtt):
+                self.reportCatMqtt(self.foundCat)
+            self.lastFoundCat = self.foundCat
+            
         # Check if we are in a cat event - a cat event is started by two cat detections within 15 seconds.
         # It ends 30 seconds after the last cat detection.
         if self.foundCat:
@@ -235,7 +252,7 @@ class CatoCam():
             self.lastCatImgTime = self.imgTime
         else:
             if (self.catEventActive):
-                if (self.imgTime - self.lastCatImgTime) > 30:
+                if (self.imgTime - self.lastCatImgTime) > 5: # was 30 FIXME
                     print("End of Cat Event")
                     self.catEventActive = False
                     self.catEventStartTime = None
