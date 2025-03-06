@@ -51,6 +51,7 @@ If found that pre-trained object detection models were giving poor performance o
 For this reason I modified the YoloV8 model by training it on my own models.   This required the following:
   - Set up the camera and have it monitor the garden, recording video clips when motion was detected.
   - View the video clips to identify which ones contain cats, and download them (You actually have to download the videos onto a phone as there is no computer interfae to the Tapo camera, only and Android App.  So the process was to view the video on my phone, download it onto my phone, and upload it to Google Photos.  I could then download it onto my computer using the Google Photos web site).
+    
   - Use the [RoboFlow](https://roboflow.com) web site to create an annotated dataset by using its capabilities to:
       - split the video clips into frames
       - view each frame
@@ -60,6 +61,7 @@ For this reason I modified the YoloV8 model by training it on my own models.   T
     <img src="https://app.roboflow.com/images/download-dataset-badge.svg"></img>
 </a>
   - The annotation was made less tedious by first doing a few (well a hundred or so) frames manually, then using RoboFlow's training functionality (you get three goes at training a model with a free account), to create an object detection model.   This object detection model can then be used to help you annotate other images by suggesting what the bounding box and object is, so you only have to correct it when it has something wrong.
+
   - Export the Roboflow dataset in YoloV8 format, and extract it to ~/yolo/datasets/CatoCam.<version number>
   - Create a python virtual environment for catocam: python -m venv /home/graham/pyEnvs/catocam
   - Activate catocam environment with source ~/pyEnvs/catocam/bin/activate
